@@ -14,6 +14,8 @@
             android:background="@drawable/magnitude_circle"
             android:padding="16dp"
             android:text="Mag"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
             android:id="@+id/mag"
     />
 
@@ -27,6 +29,12 @@
                 android:layout_height="wrap_content"
                 android:text="Address"
                 android:paddingLeft="16dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:textAllCaps="true"
+                android:textColor="@color/textColorEarthquakeDetails"
+                android:textSize="12sp"
                 android:id="@+id/address"
         />
         <TextView
@@ -35,6 +43,10 @@
                 android:text="city"
                 android:paddingLeft="16dp"
                 android:layout_below="@id/address"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/textColorEarthquakeLocation"
+                android:textSize="16sp"
                 android:id="@+id/city"
         />
     </RelativeLayout>
@@ -44,6 +56,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Date"
+            android:textColor="@color/textColorEarthquakeDetails"
+            android:textSize="12sp"
             android:id="@+id/date"
     />
 
