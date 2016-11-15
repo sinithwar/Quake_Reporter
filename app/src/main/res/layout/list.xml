@@ -11,16 +11,34 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/magnitude_circle"
+            android:padding="16dp"
             android:text="Mag"
             android:id="@+id/mag"
     />
-    <TextView
+
+    <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="City"
-            android:id="@+id/city"
-    />
+            android:layout_weight="4"
+    >
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:paddingLeft="16dp"
+                android:id="@+id/address"
+        />
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="city"
+                android:paddingLeft="16dp"
+                android:layout_below="@id/address"
+                android:id="@+id/city"
+        />
+    </RelativeLayout>
+
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"

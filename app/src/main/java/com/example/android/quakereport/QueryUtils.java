@@ -6,8 +6,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
@@ -59,7 +63,7 @@ public final class QueryUtils {
 
 
             // Iterates over features array by getting the JSONobjects in that array
-            for(int i = 0; i < features.length(); i++){
+            for(int i = 0; i <= features.length(); i++){
 
                 JSONObject featuresJSONObject = features.getJSONObject(i);
 
@@ -67,9 +71,18 @@ public final class QueryUtils {
                 JSONObject properties = featuresJSONObject.getJSONObject("properties");
                 double mag = properties.getDouble("mag");
                 String place = properties.getString("place");
-                String time = properties.getString("time");
+                Long time = properties.getLong("time");
+                // Extract the time variable as a new Date object
+                Date getProperTimeFormatForDisplay = new Date(time);
+                // Setup a simple formatter to format the time correctly
+                SimpleDateFormat formatTimeForDisplay = new SimpleDateFormat("MM, dd - yyyy");
+                // Changes the time to the correct format and returns it as a String
+                String displayTime = formatTimeForDisplay.format(getProperTimeFormatForDisplay).toString();
+                // Applies a Standard Format to the Magnitude so that solid integers are displayed as doubles
+                DecimalFormat formatter = new DecimalFormat("0.0");
+                String magOutput = formatter.format(mag);
                 // Adds each iteration to the earthquakes Array for iteration over the List View Earthquake Activity
-                earthquakes.add(new Quake(mag, place, time));
+                earthquakes.add(new Quake(magOutput, place, displayTime));
             }
 
 
