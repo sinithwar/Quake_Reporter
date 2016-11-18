@@ -8,10 +8,12 @@ public class Quake {
     private String mag;
     private String name;
     private String dateOccured;
-    public Quake(String mag, String name, String dateOccured){
+    private String url;
+    public Quake(String mag, String name, String dateOccured, String url){
         this.mag = mag;
         this.name = name;
         this.dateOccured = dateOccured;
+        this.url = url;
     }
 
 
@@ -25,5 +27,9 @@ public class Quake {
 
     public String getDateOccured() {
         return dateOccured;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }
