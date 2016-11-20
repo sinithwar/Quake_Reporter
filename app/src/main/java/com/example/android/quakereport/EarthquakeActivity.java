@@ -15,7 +15,9 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,13 +25,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Quake>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     /** Sample JSON response for a USGS query */
@@ -67,29 +67,29 @@ public class EarthquakeActivity extends AppCompatActivity {
                 }
             }
         });
-        EarthQuakeAsync task = new EarthQuakeAsync();
-        task.execute(JSON_RESPONSE);
+
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(1, null, this);
     }
-    private class EarthQuakeAsync extends AsyncTask<String, Void, ArrayList> {
-        // Pass in an url to the AnsycTask so that it can return a string, which is then returned in the even parameter of
-        // the Async Task and used by the Post Execute
-        @Override
-        protected ArrayList doInBackground(String... url) {
-            // Don't perform the request if there are no URLs, or the first URL is null
-            if (url.length < 1 || url[0] == null) {
-                return null;
-            }
-            ArrayList earthquakes = QueryUtils.extractEarthquakes(url[0]);
-            return earthquakes;
-        }
 
-        @Override
-        protected void onPostExecute(ArrayList data) {
-            qAdapter.clear();
+    @Override
+    public Loader<List<Quake>> onCreateLoader(int i, Bundle bundle){
+        Log.v("Create Loader", "Successful");
+        return new QuakeLoader(this, JSON_RESPONSE);
+    }
 
-            if (data != null && !data.isEmpty()){
-                qAdapter.addAll(data);
-            }
+    @Override
+    public void onLoadFinished(Loader<List<Quake>> loader, List<Quake> data) {
+        qAdapter.clear();
+
+        if (data != null && !data.isEmpty()){
+            qAdapter.addAll(data);
         }
+        Log.v("Load Finished", "Successful");
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Quake>> loader){
+        qAdapter.clear();
     }
 }

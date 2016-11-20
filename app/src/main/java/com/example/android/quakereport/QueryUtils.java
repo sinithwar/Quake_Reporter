@@ -5,7 +5,6 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +17,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.logging.SimpleFormatter;
+import java.util.List;
 
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
@@ -37,7 +35,7 @@ public final class QueryUtils {
     }
 
 
-    public static JSONObject fetchEarthquakeData(String requestUrl) {
+    public static List<Quake> fetchEarthquakeData(String requestUrl) {
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -48,12 +46,8 @@ public final class QueryUtils {
         } catch (IOException e) {
             Log.e("QueryUtils51", "Error closing input stream", e);
         }
-        JSONObject returnJson = null;
-        try{
-            returnJson = new JSONObject(jsonResponse);
-        }catch (JSONException e){
-            Log.e("QueryUtil", "fetchED", e);
-        }
+        // Creates a List of Quake objects
+        List<Quake> returnJson = extractEarthquakes(jsonResponse);
         // Return the {@link Event}
         return returnJson;
     }
@@ -132,21 +126,19 @@ public final class QueryUtils {
     }
 
 
-    public static ArrayList<Quake> extractEarthquakes(String JSON_RESPONSE) {
+    public static List<Quake> extractEarthquakes(String JSON_RESPONSE) {
 
         // Create an empty ArrayList that we can start adding earthquakes to
-        ArrayList<Quake> earthquakes = new ArrayList<>();
+        List<Quake> earthquakes = new ArrayList<>();
 
         // Try to parse the SAMPLE_JSON_RESPONSE. If there's a problem with the way the JSON
         // is formatted, a JSONException exception object will be thrown.
         // Catch the exception so the app doesn't crash, and print the error message to the logs.
         try {
 
-            // TODO: Parse the response given by the SAMPLE_JSON_RESPONSE string and
-            // build up a list of Earthquake objects with the corresponding data.
 
             // Takes the String and provides a JSON Object to work with
-            JSONObject jsonObject = fetchEarthquakeData(JSON_RESPONSE);
+            JSONObject jsonObject = new JSONObject(JSON_RESPONSE);
 
             //Traverses the JSON tree to get to the features section
             JSONArray features = jsonObject.getJSONArray("features");
@@ -162,15 +154,21 @@ public final class QueryUtils {
                 double mag = properties.getDouble("mag");
                 String place = properties.getString("place");
                 Long time = properties.getLong("time");
+
+
                 // Extract the time variable as a new Date object
                 Date getProperTimeFormatForDisplay = new Date(time);
                 // Setup a simple formatter to format the time correctly
                 SimpleDateFormat formatTimeForDisplay = new SimpleDateFormat("MM, dd - yyyy");
                 // Changes the time to the correct format and returns it as a String
                 String displayTime = formatTimeForDisplay.format(getProperTimeFormatForDisplay).toString();
+
+
                 // Applies a Standard Format to the Magnitude so that solid integers are displayed as doubles
                 DecimalFormat formatter = new DecimalFormat("0.0");
                 String magOutput = formatter.format(mag);
+
+
                 // Grab the url from the JSON response
                 String url = properties.getString("url");
                 // Adds each iteration to the earthquakes Array for iteration over the List View Earthquake Activity

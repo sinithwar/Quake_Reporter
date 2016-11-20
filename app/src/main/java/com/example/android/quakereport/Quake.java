@@ -3,7 +3,6 @@ package com.example.android.quakereport;
 /**
  * Created by Tommy on 11/13/2016.
  */
-import android.graphics.drawable.GradientDrawable;
 public class Quake {
     private String mag;
     private String name;
