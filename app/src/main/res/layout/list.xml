@@ -6,7 +6,6 @@
               android:padding="16dp"
               android:id="@+id/list_view"
 >
-
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"

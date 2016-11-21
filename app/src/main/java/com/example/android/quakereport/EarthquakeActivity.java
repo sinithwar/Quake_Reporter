@@ -16,16 +16,24 @@
 package com.example.android.quakereport;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +43,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     /** Sample JSON response for a USGS query */
     private static final String JSON_RESPONSE = "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
     private QuakeAdapter qAdapter;
+    private ProgressBar progressor;
+    private static final String USGS_REQUEST_URL = "http://earthquake.usgs.gov/fdsnws/event/1/query";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +56,9 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         final ListView earthquakeListView = (ListView) findViewById(R.id.earthquake_view);
 
         earthquakeListView.setAdapter(qAdapter);
+        View emptyText = findViewById(R.id.empty);
+        earthquakeListView.setEmptyView(emptyText);
+        progressor = (ProgressBar) findViewById(R.id.loading_spinner);
 
         // Set up ClickListener event to handle the user click
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -67,21 +80,49 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
                 }
             }
         });
+        ConnectivityManager check = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = check.getActiveNetworkInfo();
 
-        LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(1, null, this);
+        if (networkInfo != null && networkInfo.isConnected()){
+            LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(1, null, this);
+        }else{
+            View loadingIndicator = findViewById(R.id.loading_spinner);
+            loadingIndicator.setVisibility(View.GONE);
+            Toast warning = new Toast(this);
+            warning.makeText(this, "No Internet Connection Found", Toast.LENGTH_LONG);
+            warning.setGravity(1,0,0);
+        }
     }
 
     @Override
     public Loader<List<Quake>> onCreateLoader(int i, Bundle bundle){
         Log.v("Create Loader", "Successful");
-        return new QuakeLoader(this, JSON_RESPONSE);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String minMagnitude = sharedPrefs.getString(
+                getString(R.string.settings_min_magnitude_key),
+                getString(R.string.settings_min_magnitude_default));
+
+        String orderBy = sharedPrefs.getString(
+                getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default)
+        );
+        Uri baseUri = Uri.parse(USGS_REQUEST_URL);
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+
+        uriBuilder.appendQueryParameter("format", "geojson");
+        uriBuilder.appendQueryParameter("limit", "10");
+        uriBuilder.appendQueryParameter("minmag", minMagnitude);
+        uriBuilder.appendQueryParameter("orderby", orderBy);
+
+        return new QuakeLoader(this, uriBuilder.toString());
     }
 
     @Override
     public void onLoadFinished(Loader<List<Quake>> loader, List<Quake> data) {
+        View loadingIndicator = findViewById(R.id.loading_spinner);
+        loadingIndicator.setVisibility(View.GONE);
         qAdapter.clear();
-
         if (data != null && !data.isEmpty()){
             qAdapter.addAll(data);
         }
@@ -91,5 +132,21 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     @Override
     public void onLoaderReset(Loader<List<Quake>> loader){
         qAdapter.clear();
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
